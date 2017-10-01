@@ -12,6 +12,22 @@
   ],
   'targets': [
     {
+      'target_name': 'copy_libs',
+      'type': 'none',
+      'copies': [
+        {
+          'destination': '<(module_root_dir)/build/Release/',
+          'files': [
+            '<(module_root_dir)/deps/windows/dll/AntTweakBar.dll',
+            '<(module_root_dir)/deps/windows/dll/AntTweakBar64.dll',
+            '<(module_root_dir)/deps/windows/dll/FreeImage.dll',
+            '<(module_root_dir)/deps/windows/dll/glew32.dll',
+            '<(module_root_dir)/deps/windows/dll/glfw3.dll'
+          ]
+        }
+      ]
+    },
+    {
       'target_name': 'glfw',
       'defines': [
         'VERSION=0.4.6',
@@ -26,6 +42,18 @@
       ],
       'conditions': [
         ['OS=="linux"', {
+          'include_dirs': [
+            "/usr/local/include",
+            './deps/include',
+            "/usr/include/X11"
+          ],
+          'library_dirs': [
+              "./deps/linux/lib",
+              "/usr/include/GL",
+              "/usr/local/lib/",
+              "/usr/lib/i386-linux-gnu",
+              "./deps/linux/lib/<(target_arch)",
+              ],
           'libraries': [
             '-lAntTweakBar', '<!@(pkg-config --libs glfw3 glew)',
             '-lXrandr','-lXinerama','-lXxf86vm','-lXcursor','-lXi',
@@ -34,12 +62,14 @@
         }],
         ['OS=="mac"', {
           'include_dirs': [ '<!@(pkg-config glfw3 glew --cflags-only-I | sed s/-I//g)','-I<(ANTTWEAKBAR_ROOT)/include'],
+          #'libraries': [ '<!@(pkg-config --libs glfw3 glew)', '-L<(ANTTWEAKBAR_ROOT)/lib', '-lAntTweakBar', '-framework OpenGL'],
           'libraries': [ '<!@(pkg-config --libs glfw3 glew)', '-L<(ANTTWEAKBAR_ROOT)/lib', '-lAntTweakBar', '-framework OpenGL'],
           'library_dirs': ['/usr/local/lib'],
         }],
         ['OS=="win"', {
             'include_dirs': [
               './deps/include',
+              '~/.node-gyp/4.4.0/include/node'
               ],
             'library_dirs': [
               './deps/windows/lib/<(target_arch)',
@@ -71,9 +101,9 @@
                 'libraries': ['AntTweakBar64.lib']
               }]
             ]
-          },
-        ],
-      ],
+          }
+        ]
+      ]
     }
   ]
 }

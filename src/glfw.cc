@@ -15,6 +15,8 @@ using namespace std;
 
 namespace glfw {
 
+GLFWwindow* window = NULL;
+
 /* @Module: GLFW initialization, termination and version querying */
 
 NAN_METHOD(Init) {
@@ -132,7 +134,7 @@ void NAN_INLINE(CallEmitter(int argc, Local<Value> argv[])) {
 }
 
 /* Window callbacks handling */
-void APIENTRY windowPosCB(GLFWwindow *window, int xpos, int ypos) {
+void /*APIENTRY*/ windowPosCB(GLFWwindow *window, int xpos, int ypos) {
   Nan::HandleScope scope;
   //cout<<"resizeCB: "<<w<<" "<<h<<endl;
 
@@ -149,7 +151,7 @@ void APIENTRY windowPosCB(GLFWwindow *window, int xpos, int ypos) {
   CallEmitter(2, argv);
 }
 
-void APIENTRY windowSizeCB(GLFWwindow *window, int w, int h) {
+void /*APIENTRY*/ windowSizeCB(GLFWwindow *window, int w, int h) {
   Nan::HandleScope scope;
   //cout<<"resizeCB: "<<w<<" "<<h<<endl;
 
@@ -166,7 +168,7 @@ void APIENTRY windowSizeCB(GLFWwindow *window, int w, int h) {
   CallEmitter(2, argv);
 }
 
-void APIENTRY windowFramebufferSizeCB(GLFWwindow *window, int w, int h) {
+void /*APIENTRY*/ windowFramebufferSizeCB(GLFWwindow *window, int w, int h) {
   Nan::HandleScope scope;
   //cout<<"resizeCB: "<<w<<" "<<h<<endl;
 
@@ -183,7 +185,7 @@ void APIENTRY windowFramebufferSizeCB(GLFWwindow *window, int w, int h) {
   CallEmitter(2, argv);
 }
 
-void APIENTRY windowCloseCB(GLFWwindow *window) {
+void /*APIENTRY*/ windowCloseCB(GLFWwindow *window) {
   Nan::HandleScope scope;
 
   Local<Value> argv[1] = {
@@ -193,7 +195,7 @@ void APIENTRY windowCloseCB(GLFWwindow *window) {
   CallEmitter(1, argv);
 }
 
-void APIENTRY windowRefreshCB(GLFWwindow *window) {
+void /*APIENTRY*/ windowRefreshCB(GLFWwindow *window) {
   Nan::HandleScope scope;
 
   Local<Array> evt=Nan::New<Array>(2);
@@ -208,7 +210,7 @@ void APIENTRY windowRefreshCB(GLFWwindow *window) {
   CallEmitter(2, argv);
 }
 
-void APIENTRY windowIconifyCB(GLFWwindow *window, int iconified) {
+void /*APIENTRY*/ windowIconifyCB(GLFWwindow *window, int iconified) {
   Nan::HandleScope scope;
 
   Local<Array> evt=Nan::New<Array>(2);
@@ -223,7 +225,7 @@ void APIENTRY windowIconifyCB(GLFWwindow *window, int iconified) {
   CallEmitter(2, argv);
 }
 
-void APIENTRY windowFocusCB(GLFWwindow *window, int focused) {
+void /*APIENTRY*/ windowFocusCB(GLFWwindow *window, int focused) {
   Nan::HandleScope scope;
 
   Local<Array> evt=Nan::New<Array>(2);
@@ -311,7 +313,7 @@ static int jsKeyCode[]={
 /*GLFW_KEY_MENU*/         18
 };
 
-void APIENTRY keyCB(GLFWwindow *window, int key, int scancode, int action, int mods) {
+void /*APIENTRY*/ keyCB(GLFWwindow *window, int key, int scancode, int action, int mods) {
   const char *actionNames = "keyup\0  keydown\0keypress";
 
   if(!TwEventKeyGLFW(key,action)) {
@@ -353,7 +355,7 @@ void APIENTRY keyCB(GLFWwindow *window, int key, int scancode, int action, int m
   }
 }
 
-void APIENTRY cursorPosCB(GLFWwindow* window, double x, double y) {
+void /*APIENTRY*/ cursorPosCB(GLFWwindow* window, double x, double y) {
   if(!TwEventMousePosGLFW(x,y)) {
     int w,h;
     glfwGetWindowSize(window, &w, &h);
@@ -381,7 +383,7 @@ void APIENTRY cursorPosCB(GLFWwindow* window, double x, double y) {
   }
 }
 
-void APIENTRY cursorEnterCB(GLFWwindow* window, int entered) {
+void /*APIENTRY*/ cursorEnterCB(GLFWwindow* window, int entered) {
   Nan::HandleScope scope;
 
   Local<Array> evt=Nan::New<Array>(2);
@@ -396,7 +398,7 @@ void APIENTRY cursorEnterCB(GLFWwindow* window, int entered) {
   CallEmitter(2, argv);
 }
 
-void APIENTRY mouseButtonCB(GLFWwindow *window, int button, int action, int mods) {
+void /*APIENTRY*/ mouseButtonCB(GLFWwindow *window, int button, int action, int mods) {
    if(!TwEventMouseButtonGLFW(button,action)) {
     Nan::HandleScope scope;
     Local<Array> evt=Nan::New<Array>(7);
@@ -417,7 +419,7 @@ void APIENTRY mouseButtonCB(GLFWwindow *window, int button, int action, int mods
   }
 }
 
-void APIENTRY scrollCB(GLFWwindow *window, double xoffset, double yoffset) {
+void /*APIENTRY*/ scrollCB(GLFWwindow *window, double xoffset, double yoffset) {
   if(!TwEventMouseWheelGLFW(yoffset)) {
     Nan::HandleScope scope;
 
@@ -436,7 +438,7 @@ void APIENTRY scrollCB(GLFWwindow *window, double xoffset, double yoffset) {
   }
 }
 
-int APIENTRY windowCloseCB() {
+int /*APIENTRY*/ windowCloseCB() {
   Nan::HandleScope scope;
 
   Local<Value> argv[1] = {
@@ -600,7 +602,6 @@ NAN_METHOD(glfw_CreateWindow) {
   String::Utf8Value str(info[2]->ToString());
   int monitor_idx = info[3]->Uint32Value();
 
-  GLFWwindow* window = NULL;
   GLFWmonitor **monitors = NULL, *monitor = NULL;
   int monitor_count;
   if(info.Length() >= 4 && monitor_idx >= 0){
@@ -613,6 +614,7 @@ NAN_METHOD(glfw_CreateWindow) {
 
   if(!windowCreated) {
     window = glfwCreateWindow(width, height, *str, monitor, NULL);
+    windowCreated = true;
 
     if(!window) {
       // can't create window, throw error
@@ -635,10 +637,25 @@ NAN_METHOD(glfw_CreateWindow) {
       fprintf(stderr, "%s", msg.c_str());
       return Nan::ThrowError(msg.c_str());
     }
-    fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+    
+    //fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
   }
-  else
-    glfwSetWindowSize(window, width,height);
+  else {
+    glfwSetWindowSize(window, width, height);
+    glfwMakeContextCurrent(window);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    GLenum err = glewInit();
+    if (err)
+    {
+      /* Problem: glewInit failed, something is seriously wrong. */
+      string msg="Can't init GLEW (glew error ";
+      msg+=(const char*) glewGetErrorString(err);
+      msg+=")";
+
+      fprintf(stderr, "%s", msg.c_str());
+      return Nan::ThrowError(msg.c_str());
+    }
+  }
 
   // Set callback functions
   glfw_events.Reset( info.This()->Get(JS_STR("events"))->ToObject());
@@ -704,7 +721,7 @@ NAN_METHOD(SetWindowSize) {
   uint64_t handle=info[0]->IntegerValue();
   if(handle) {
     GLFWwindow* window = reinterpret_cast<GLFWwindow*>(handle);
-    glfwSetWindowSize(window, info[1]->Uint32Value(),info[2]->Uint32Value());
+    glfwSetWindowSize(window, info[1]->Uint32Value(), info[2]->Uint32Value());
   }
   return;
 }
